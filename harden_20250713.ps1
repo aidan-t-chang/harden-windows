@@ -97,11 +97,20 @@ if (-not $chromeInstalled) {
 # 1.2 Write a few lines of text on the screen explaining briefly what the
 # script does and double check with the user (have them enter the exact string "I AGREE" or st) before proceeding.
 #--------------------------------------------------------------------------------
-write-host "Make sure that Zoom is installed as well as PyCharm and Microsoft Visual Studio. This script will restrict installations."
-$test2 = read-host -Prompt "Input anything to continue"
+write-host "Make sure that Chrome is installed as well as PyCharm, Zoom, and Microsoft Visual Studio. This script will restrict installations."
+$test2 = read-host -Prompt "Input Y to continue"
+if ($test2 -ne "Y") {
+    write-host "Exiting script."
+    exit
+}
 
-write-host "Please create the Chrome profiles for the above emails right now. The script will restrict Chrome to only these profiles."
-$test = read-host -Prompt "Input anything to continue"
+write-host "Please create Chrome profiles for the emails you want. The script will restrict Chrome to only these profiles."
+$test = read-host -Prompt "Input Y to continue"
+if ($test -ne "Y") {
+    write-host "Exiting script."
+    exit
+}
+
 write-host "This is a PowerShell script that hardens Windows. Features like Command Prompt, USB Access, and Program Files access will be restricted. ONCE YOU RUN THIS SCRIPT, IT IS VERY HARD TO UNDO THE CHANGES."
 write-host "Please type 'I AGREE' to continue."
 $response = read-host
@@ -366,6 +375,11 @@ if (!(Test-Path "HKCU:\System\GameConfigStore")) {
 }
 Set-ItemProperty -Path "HKCU:\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Force 
 write-host "Game Bar and Widgets have been disabled."
+# Disable Microsoft Solitaire Collection
+Get-AppxPackage -AllUsers Microsoft.MicrosoftSolitaireCollection | Remove-AppxPackage
+write-host "Microsoft Solitaire Collection has been removed."
+# Disable Microsoft Copilot
+Get-AppxPackage *Copilot* | Remove-AppxPackage
 # Disable Xbox App, Groove Music, Movies & TV, Weather, Clipchamp, Microsoft Edge and other apps using AppLocker
 # Disable Microsoft Edge
 $edgeXml = @"
@@ -721,8 +735,8 @@ Create-AppLockerWhitelist
 #--------------------------------------------------------------------------------
 # Pipes all values from Get-NetAdapter to Disable-NetAdapter, -Confirm:$false suppresses confirmation prompts
 # On a VM, this will terminate the network connection to the VM
-Get-NetAdapter | Disable-NetAdapter -Confirm:$false
-write-host "Network adapters have been disabled."
+# Get-NetAdapter | Disable-NetAdapter -Confirm:$false
+# write-host "Network adapters have been disabled."
 
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 write-host "All changes have been made to harden Windows. A system restart is required for all changes to take effect."
